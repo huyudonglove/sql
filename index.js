@@ -80,26 +80,47 @@ router.get('/getPost',async (ctx)=>{
 
 });
 router.post('/utopa/ar/access/login',koaBody(),async (ctx)=>{
-    console.log(ctx);
+    //console.log(ctx);
     console.log(JSON.stringify(ctx.request.body));
     let loginName=ctx.request.body.loginName;
     let password=ctx.request.body.password;
-    loginName&&password?(()=>{
-        let sql='SELECT * FROM user';
-        db.query(sql,(err,res)=>{
-            err&&console.log(err);
-            res&&(()=>{
-                console.log(res,789)
-                let msg=JSON.parse(JSON.stringify(res));
-                console.log(msg,78)
+    console.log(loginName,password,777777)
+    if(loginName&&password){
+        let sql="SELECT * FROM user where loginName ="+JSON.stringify(loginName);
+        let result=await query(sql);
+        console.log(result,789);
+        result.length?(()=>{
+            let apple=JSON.parse(JSON.stringify(result));
+            console.log(apple,999);
+            password==apple[0].password?(()=>{
+                rbody.msg='success'
+                rbody.code=0;
+                ctx.body=rbody;
+            })():(()=>{
+                rbody.msg='密码错误'
+                rbody.code=1;
+                ctx.body=rbody;
             })();
-        })
-    })():(()=>{
+        })():(()=>{
+            rbody.msg='不存在该用户'
+            rbody.code=1;
+            ctx.body=rbody;
+        })();
+    }else {
+        rbody.msg='用户名密码不能为空'
         rbody.code=1;
-        rbody.msg='用户名密码不能为空';
         ctx.body=rbody;
-    })();
-
-
+    }
 });
+const query = function (sql) {
+    return new Promise((resolve, reject) => {
+        db.query(sql,function (error, results) {
+            if(error){
+                reject(error);
+            }else{
+                resolve(results)
+            }
+        });
+    })
+}
 
